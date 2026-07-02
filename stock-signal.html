@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>股票买卖判断</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f6f8;
+      --panel: #ffffff;
+      --text: #18212f;
+      --muted: #667085;
+      --line: #d8dee8;
+      --blue: #2563eb;
+      --green: #0f8f5f;
+      --red: #d92d20;
+      --amber: #b7791f;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    main {
+      width: min(960px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 36px 0;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 10px 28px rgba(22, 34, 51, 0.08);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0 12px;
+      font-size: 16px;
+      color: var(--text);
+      background: #fff;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    button {
+      min-height: 42px;
+      border: 0;
+      border-radius: 6px;
+      padding: 0 16px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .primary {
+      color: #fff;
+      background: var(--blue);
+    }
+
+    .secondary {
+      color: var(--text);
+      background: #eef2f7;
+    }
+
+    .result {
+      min-height: 210px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      border-radius: 999px;
+      padding: 0 12px;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .sell {
+      color: #fff;
+      background: var(--red);
+    }
+
+    .watch {
+      color: #fff;
+      background: var(--green);
+    }
+
+    .warn {
+      color: #fff;
+      background: var(--amber);
+    }
+
+    .metric {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 15px;
+    }
+
+    .metric:last-child {
+      border-bottom: 0;
+    }
+
+    .metric span:first-child {
+      color: var(--muted);
+    }
+
+    .metric span:last-child {
+      font-weight: 800;
+    }
+
+    .message {
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .rule {
+      margin-top: 18px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      background: #f8fafc;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 760px) {
+      main {
+        width: min(100% - 24px, 960px);
+        padding: 24px 0;
+      }
+
+      .shell,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>股票买卖判断</h1>
+    <p class="subtitle">输入均线、当前股价和 KDJ，自动计算当前股价相对 MA10 的偏离值。</p>
+
+    <div class="shell">
+      <section class="panel">
+        <div class="form-grid">
+          <div>
+            <label for="ma5">MA5</label>
+            <input id="ma5" type="number" inputmode="decimal" step="0.01" placeholder="例如 128.50">
+          </div>
+          <div>
+            <label for="ma10">MA10</label>
+            <input id="ma10" type="number" inputmode="decimal" step="0.01" placeholder="例如 120.00">
+          </div>
+          <div>
+            <label for="price">当前股价</label>
+            <input id="price" type="number" inputmode="decimal" step="0.01" placeholder="例如 145.00">
+          </div>
+          <div>
+            <label for="kdj">KDJ 值</label>
+            <input id="kdj" type="number" inputmode="decimal" step="0.01" placeholder="例如 105">
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="primary" type="button" id="calculate">判断</button>
+          <button class="secondary" type="button" id="reset">清空</button>
+        </div>
+
+        <div class="rule">
+          卖出条件：当前股价相对 MA10 偏离值超过 20%，并且 KDJ 大于 100。
+        </div>
+      </section>
+
+      <aside class="panel result" aria-live="polite">
+        <div id="badge" class="badge warn">等待输入</div>
+        <p id="message" class="message">填写数据后点击判断。</p>
+
+        <div class="metric">
+          <span>MA5 与 MA10 关系</span>
+          <span id="trend">--</span>
+        </div>
+        <div class="metric">
+          <span>MA10 偏离值</span>
+          <span id="deviation">--</span>
+        </div>
+        <div class="metric">
+          <span>KDJ 状态</span>
+          <span id="kdjStatus">--</span>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    const fields = {
+      ma5: document.getElementById("ma5"),
+      ma10: document.getElementById("ma10"),
+      price: document.getElementById("price"),
+      kdj: document.getElementById("kdj")
+    };
+
+    const badge = document.getElementById("badge");
+    const message = document.getElementById("message");
+    const trend = document.getElementById("trend");
+    const deviation = document.getElementById("deviation");
+    const kdjStatus = document.getElementById("kdjStatus");
+
+    function readNumber(input) {
+      const value = Number(input.value);
+      return Number.isFinite(value) ? value : null;
+    }
+
+    function setBadge(text, className) {
+      badge.textContent = text;
+      badge.className = `badge ${className}`;
+    }
+
+    function calculateSignal() {
+      const ma5 = readNumber(fields.ma5);
+      const ma10 = readNumber(fields.ma10);
+      const price = readNumber(fields.price);
+      const kdj = readNumber(fields.kdj);
+
+      if ([ma5, ma10, price, kdj].some(value => value === null) || ma10 <= 0) {
+        setBadge("数据不完整", "warn");
+        message.textContent = "请填写有效数字，MA10 必须大于 0。";
+        trend.textContent = "--";
+        deviation.textContent = "--";
+        kdjStatus.textContent = "--";
+        return;
+      }
+
+      const deviationValue = ((price - ma10) / ma10) * 100;
+      const isOverExtended = deviationValue > 20;
+      const isKdjHot = kdj > 100;
+      const canSell = isOverExtended && isKdjHot;
+
+      trend.textContent = ma5 >= ma10 ? "MA5 >= MA10" : "MA5 < MA10";
+      deviation.textContent = `${deviationValue.toFixed(2)}%`;
+      kdjStatus.textContent = isKdjHot ? "KDJ > 100" : "KDJ <= 100";
+
+      if (canSell) {
+        setBadge("可以卖出", "sell");
+        message.textContent = "当前股价相对 MA10 偏离超过 20%，且 KDJ 大于 100，满足你的卖出条件。";
+      } else {
+        setBadge("暂不卖出", "watch");
+        message.textContent = "当前没有同时满足 MA10 偏离超过 20% 与 KDJ 大于 100 两个条件。";
+      }
+    }
+
+    function resetForm() {
+      Object.values(fields).forEach(input => {
+        input.value = "";
+      });
+      setBadge("等待输入", "warn");
+      message.textContent = "填写数据后点击判断。";
+      trend.textContent = "--";
+      deviation.textContent = "--";
+      kdjStatus.textContent = "--";
+    }
+
+    document.getElementById("calculate").addEventListener("click", calculateSignal);
+    document.getElementById("reset").addEventListener("click", resetForm);
+    Object.values(fields).forEach(input => {
+      input.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+          calculateSignal();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
