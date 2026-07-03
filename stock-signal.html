@@ -209,11 +209,15 @@
 <body>
   <main>
     <h1>股票买卖判断</h1>
-    <p class="subtitle">输入均线、当前股价和 KDJ，自动计算当前股价相对 MA10 的偏离值。</p>
+    <p class="subtitle">输入均线、当前股价和 KDJ，自动计算当前股价相对 MA5、MA10、MA20 的偏离值。</p>
 
     <div class="shell">
       <section class="panel">
         <div class="form-grid">
+          <div>
+            <label for="price">当前股价</label>
+            <input id="price" type="number" inputmode="decimal" step="0.01" placeholder="例如 145.00">
+          </div>
           <div>
             <label for="ma5">MA5</label>
             <input id="ma5" type="number" inputmode="decimal" step="0.01" placeholder="例如 128.50">
@@ -223,8 +227,8 @@
             <input id="ma10" type="number" inputmode="decimal" step="0.01" placeholder="例如 120.00">
           </div>
           <div>
-            <label for="price">当前股价</label>
-            <input id="price" type="number" inputmode="decimal" step="0.01" placeholder="例如 145.00">
+            <label for="ma20">MA20</label>
+            <input id="ma20" type="number" inputmode="decimal" step="0.01" placeholder="例如 112.00">
           </div>
           <div>
             <label for="kdj">KDJ 值</label>
@@ -247,12 +251,20 @@
         <p id="message" class="message">填写数据后点击判断。</p>
 
         <div class="metric">
-          <span>MA5 与 MA10 关系</span>
+          <span>均线高低比较</span>
           <span id="trend">--</span>
         </div>
         <div class="metric">
-          <span>MA10 偏离值</span>
-          <span id="deviation">--</span>
+          <span>相对 MA5 偏离值</span>
+          <span id="ma5Deviation">--</span>
+        </div>
+        <div class="metric">
+          <span>相对 MA10 偏离值</span>
+          <span id="ma10Deviation">--</span>
+        </div>
+        <div class="metric">
+          <span>相对 MA20 偏离值</span>
+          <span id="ma20Deviation">--</span>
         </div>
         <div class="metric">
           <span>KDJ 状态</span>
@@ -264,16 +276,19 @@
 
   <script>
     const fields = {
+      price: document.getElementById("price"),
       ma5: document.getElementById("ma5"),
       ma10: document.getElementById("ma10"),
-      price: document.getElementById("price"),
+      ma20: document.getElementById("ma20"),
       kdj: document.getElementById("kdj")
     };
 
     const badge = document.getElementById("badge");
     const message = document.getElementById("message");
     const trend = document.getElementById("trend");
-    const deviation = document.getElementById("deviation");
+    const ma5Deviation = document.getElementById("ma5Deviation");
+    const ma10Deviation = document.getElementById("ma10Deviation");
+    const ma20Deviation = document.getElementById("ma20Deviation");
     const kdjStatus = document.getElementById("kdjStatus");
 
     function readNumber(input) {
@@ -289,25 +304,39 @@
     function calculateSignal() {
       const ma5 = readNumber(fields.ma5);
       const ma10 = readNumber(fields.ma10);
+      const ma20 = readNumber(fields.ma20);
       const price = readNumber(fields.price);
       const kdj = readNumber(fields.kdj);
 
-      if ([ma5, ma10, price, kdj].some(value => value === null) || ma10 <= 0) {
+      if ([price, ma5, ma10, ma20, kdj].some(value => value === null) || ma5 <= 0 || ma10 <= 0 || ma20 <= 0) {
         setBadge("数据不完整", "warn");
-        message.textContent = "请填写有效数字，MA10 必须大于 0。";
+        message.textContent = "请填写有效数字，MA5、MA10、MA20 必须大于 0。";
         trend.textContent = "--";
-        deviation.textContent = "--";
+        ma5Deviation.textContent = "--";
+        ma10Deviation.textContent = "--";
+        ma20Deviation.textContent = "--";
         kdjStatus.textContent = "--";
         return;
       }
 
-      const deviationValue = ((price - ma10) / ma10) * 100;
-      const isOverExtended = deviationValue > 20;
+      const ma5DeviationValue = ((price - ma5) / ma5) * 100;
+      const ma10DeviationValue = ((price - ma10) / ma10) * 100;
+      const ma20DeviationValue = ((price - ma20) / ma20) * 100;
+      const isOverExtended = ma10DeviationValue > 20;
       const isKdjHot = kdj > 100;
       const canSell = isOverExtended && isKdjHot;
 
-      trend.textContent = ma5 >= ma10 ? "MA5 >= MA10" : "MA5 < MA10";
-      deviation.textContent = `${deviationValue.toFixed(2)}%`;
+      trend.textContent = [
+        { label: "MA5", value: ma5 },
+        { label: "MA10", value: ma10 },
+        { label: "MA20", value: ma20 }
+      ]
+        .sort((a, b) => b.value - a.value)
+        .map(item => item.label)
+        .join(" > ");
+      ma5Deviation.textContent = `${ma5DeviationValue.toFixed(2)}%`;
+      ma10Deviation.textContent = `${ma10DeviationValue.toFixed(2)}%`;
+      ma20Deviation.textContent = `${ma20DeviationValue.toFixed(2)}%`;
       kdjStatus.textContent = isKdjHot ? "KDJ > 100" : "KDJ <= 100";
 
       if (canSell) {
@@ -326,7 +355,9 @@
       setBadge("等待输入", "warn");
       message.textContent = "填写数据后点击判断。";
       trend.textContent = "--";
-      deviation.textContent = "--";
+      ma5Deviation.textContent = "--";
+      ma10Deviation.textContent = "--";
+      ma20Deviation.textContent = "--";
       kdjStatus.textContent = "--";
     }
 
