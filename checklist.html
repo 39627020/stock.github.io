@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>股票交易 Checklist</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --line: #d9e0ea;
+      --blue: #2563eb;
+      --green: #07845d;
+      --amber: #b7791f;
+      --red: #d92d20;
+      --soft-red: #fff1f0;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: end;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button {
+      min-height: 40px;
+      border: 0;
+      border-radius: 6px;
+      padding: 0 14px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .primary {
+      color: #fff;
+      background: var(--blue);
+    }
+
+    .secondary {
+      color: var(--text);
+      background: #e9eef6;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 4px;
+      margin-bottom: 16px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #e9eef6;
+    }
+
+    .tab {
+      color: var(--muted);
+      background: transparent;
+    }
+
+    .tab.active {
+      color: #fff;
+      background: var(--blue);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 10px 28px rgba(25, 36, 54, 0.08);
+      overflow: hidden;
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 21px;
+      line-height: 1.25;
+    }
+
+    .score-box {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .score {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .score-label {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .verdict {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      margin-top: 8px;
+      border-radius: 999px;
+      padding: 0 11px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .verdict.buy,
+    .verdict.hold {
+      background: var(--green);
+    }
+
+    .verdict.small,
+    .verdict.reduce,
+    .verdict.wait {
+      background: var(--amber);
+    }
+
+    .verdict.block,
+    .verdict.sell {
+      background: var(--red);
+    }
+
+    .section {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section:last-child {
+      border-bottom: 0;
+    }
+
+    h3 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      line-height: 1.3;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: 22px 1fr auto;
+      gap: 10px;
+      align-items: start;
+      padding: 9px 0;
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .item input {
+      width: 18px;
+      height: 18px;
+      margin: 2px 0 0;
+      accent-color: var(--blue);
+      cursor: pointer;
+    }
+
+    .item.blocker {
+      margin: 5px 0;
+      border-radius: 6px;
+      padding: 10px;
+      background: var(--soft-red);
+    }
+
+    .points {
+      color: var(--muted);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .rules,
+    .blocked-reasons {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fafc;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .blocked-reasons {
+      display: none;
+      border-color: #ffd0cc;
+      background: var(--soft-red);
+      color: var(--red);
+      font-weight: 700;
+    }
+
+    .blocked-reasons.active {
+      display: grid;
+    }
+
+    @media (max-width: 860px) {
+      main {
+        width: min(100% - 24px, 1180px);
+        padding: 24px 0;
+      }
+
+      header {
+        display: block;
+      }
+
+      .actions {
+        justify-content: flex-start;
+        margin-top: 16px;
+      }
+
+      .tabs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%;
+      }
+
+      .card-head {
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>股票交易 Checklist</h1>
+        <p class="subtitle">把买入、加仓、卖出、买回拆成四个流程。先看硬性否决项，再看分数。</p>
+      </div>
+      <div class="actions">
+        <button class="secondary" type="button" data-clear="buy">清空买入</button>
+        <button class="secondary" type="button" data-clear="add">清空加仓</button>
+        <button class="secondary" type="button" data-clear="sell">清空卖出</button>
+        <button class="secondary" type="button" data-clear="rebuy">清空买回</button>
+        <button class="primary" type="button" id="clearAll">全部清空</button>
+      </div>
+    </header>
+
+    <nav class="tabs" aria-label="交易 Checklist 切换">
+      <button class="tab active" type="button" data-tab="buy" aria-selected="true">买入</button>
+      <button class="tab" type="button" data-tab="add" aria-selected="false">加仓</button>
+      <button class="tab" type="button" data-tab="sell" aria-selected="false">卖出</button>
+      <button class="tab" type="button" data-tab="rebuy" aria-selected="false">买回</button>
+    </nav>
+
+    <div class="tab-panels">
+      <article class="card tab-panel active" data-checklist="buy" id="buyPanel">
+        <div class="card-head">
+          <div>
+            <h2>买入 Checklist</h2>
+            <div class="rules">
+              <span>≥90：可以买</span>
+              <span>80~89：小仓位</span>
+              <span>&lt;80 或触发否决项：禁止买</span>
+            </div>
+            <div class="blocked-reasons" id="buyBlocks"></div>
+          </div>
+          <div class="score-box">
+            <div class="score" id="buyScore">0</div>
+            <div class="score-label">/ 100</div>
+            <div class="verdict block" id="buyVerdict">禁止买</div>
+          </div>
+        </div>
+
+        <section class="section">
+          <h3>硬性否决</h3>
+          <label class="item blocker"><input type="checkbox" data-type="buy" data-points="0" data-block="true"><span>当前交易带有FOMO或报复性交易</span><span class="points">否决</span></label>
+          <label class="item blocker"><input type="checkbox" data-type="buy" data-points="0" data-block="true"><span>未提前写下止损价和目标价</span><span class="points">否决</span></label>
+          <label class="item blocker"><input type="checkbox" data-type="buy" data-points="0" data-block="true"><span>单只股票买入后仓位会超过10%</span><span class="points">否决</span></label>
+        </section>
+
+        <section class="section">
+          <h3>一、基本面（30分）</h3>
+          <label class="item"><input type="checkbox" data-type="buy" data-points="10"><span>营收连续4季度增长20%以上</span><span class="points">10</span></label>
+          <label class="item"><input type="checkbox" data-type="buy" data-points="10"><span>EPS连续4季度增长20%以上</span><span class="points">10</span></label>
+          <label class="item"><input type="checkbox" data-type="buy" data-points="10"><span>属于AI、半导体、光通信等高成长行业，并且逻辑仍在兑现</span><span class="points">10</span></label>
+        </section>
+
+        <section class="section">
+          <h3>二、趋势与位置（30分）</h3>
+          <label class="item"><input type="checkbox" data-type="buy" data-points="10"><span>股价高于MA200，长期趋势没有破坏</span><span class="points">10</span></label>
+          <label class="item"><input type="checkbox" data-type="buy" data-points="10"><span>MA10&gt;MA20&gt;MA50，短中期趋势向上</span><span class="points">10</span></label>
+          <label class="item"><input type="checkbox" data-type="buy" data-points="10"><span>回踩MA10或MA20附近止跌，而不是追高买入</span><span class="points">10</span></label>
+        </section>
+
+        <section class="section">
+          <h3>三、风险回报（20分）</h3>
+          <label class="item"><input type="checkbox" data-type="buy" data-points="10"><span>止损距离不超过8%，且能严格执行</span><span class="points">10</span></label>
+          <label class="item"><input type="checkbox" data-type="buy" data-points="10"><span>RR（盈亏比）&gt;3，目标空间足够</span><span class="points">10</span></label>
+        </section>
+
+        <section class="section">
+          <h3>四、大盘环境（20分）</h3>
+          <label class="item"><input type="checkbox" data-type="buy" data-points="10"><span>QQQ或SPY高于MA50，市场环境支持成长股</span><span class="points">10</span></label>
+          <label class="item"><input type="checkbox" data-type="buy" data-points="10"><span>不是财报前、重大消息前的盲目押注</span><span class="points">10</span></label>
+        </section>
+      </article>
+
+      <article class="card tab-panel" data-checklist="add" id="addPanel">
+        <div class="card-head">
+          <div>
+            <h2>加仓 Checklist</h2>
+            <div class="rules">
+              <span>≥85：可以加仓</span>
+              <span>70~84：只加小仓</span>
+              <span>&lt;70 或触发否决项：禁止加仓</span>
+            </div>
+            <div class="blocked-reasons" id="addBlocks"></div>
+          </div>
+          <div class="score-box">
+            <div class="score" id="addScore">0</div>
+            <div class="score-label">/ 100</div>
+            <div class="verdict block" id="addVerdict">禁止加仓</div>
+          </div>
+        </div>
+
+        <section class="section">
+          <h3>硬性否决</h3>
+          <label class="item blocker"><input type="checkbox" data-type="add" data-points="0" data-block="true"><span>亏损持仓仍想摊低成本</span><span class="points">否决</span></label>
+          <label class="item blocker"><input type="checkbox" data-type="add" data-points="0" data-block="true"><span>加仓后单只股票仓位会超过12%</span><span class="points">否决</span></label>
+          <label class="item blocker"><input type="checkbox" data-type="add" data-points="0" data-block="true"><span>原始买入逻辑已经被财报、指引或竞争格局破坏</span><span class="points">否决</span></label>
+        </section>
+
+        <section class="section">
+          <h3>一、持仓质量（30分）</h3>
+          <label class="item"><input type="checkbox" data-type="add" data-points="10"><span>当前持仓已经盈利，市场证明方向大致正确</span><span class="points">10</span></label>
+          <label class="item"><input type="checkbox" data-type="add" data-points="10"><span>最近一季营收或EPS继续超预期</span><span class="points">10</span></label>
+          <label class="item"><input type="checkbox" data-type="add" data-points="10"><span>加仓理由不是“跌了很多所以便宜”</span><span class="points">10</span></label>
+        </section>
+
+        <section class="section">
+          <h3>二、技术确认（30分）</h3>
+          <label class="item"><input type="checkbox" data-type="add" data-points="10"><span>股价重新站上MA10或MA20</span><span class="points">10</span></label>
+          <label class="item"><input type="checkbox" data-type="add" data-points="10"><span>回调缩量，上涨放量</span><span class="points">10</span></label>
+          <label class="item"><input type="checkbox" data-type="add" data-points="10"><span>没有跌破上一次关键支撑位</span><span class="points">10</span></label>
+        </section>
+
+        <section class="section">
+          <h3>三、资金管理（20分）</h3>
+          <label class="item"><input type="checkbox" data-type="add" data-points="10"><span>本次加仓不超过原持仓的1/3</span><span class="points">10</span></label>
+          <label class="item"><input type="checkbox" data-type="add" data-points="10"><span>加仓后仍保留明确止损或移动止盈线</span><span class="points">10</span></label>
+        </section>
+
+        <section class="section">
+          <h3>四、市场环境（20分）</h3>
+          <label class="item"><input type="checkbox" data-type="add" data-points="10"><span>QQQ或SPY没有跌破MA50</span><span class="points">10</span></label>
+          <label class="item"><input type="checkbox" data-type="add" data-points="10"><span>不是连续第二笔同方向冲动交易</span><span class="points">10</span></label>
+        </section>
+      </article>
+
+      <article class="card tab-panel" data-checklist="sell" id="sellPanel">
+        <div class="card-head">
+          <div>
+            <h2>卖出 Checklist</h2>
+            <div class="rules">
+              <span>≥80：执行卖出</span>
+              <span>60~79：减仓</span>
+              <span>&lt;60：继续持有</span>
+            </div>
+            <div class="blocked-reasons" id="sellBlocks"></div>
+          </div>
+          <div class="score-box">
+            <div class="score" id="sellScore">0</div>
+            <div class="score-label">/ 100</div>
+            <div class="verdict hold" id="sellVerdict">继续持有</div>
+          </div>
+        </div>
+
+        <section class="section">
+          <h3>一、止损信号（30分）</h3>
+          <label class="item"><input type="checkbox" data-type="sell" data-points="15"><span>已亏损8%，触发原定止损</span><span class="points">15</span></label>
+          <label class="item"><input type="checkbox" data-type="sell" data-points="15"><span>跌破MA50且无法快速收复</span><span class="points">15</span></label>
+        </section>
+
+        <section class="section">
+          <h3>二、趋势信号（30分）</h3>
+          <label class="item"><input type="checkbox" data-type="sell" data-points="10"><span>收盘跌破20日均线</span><span class="points">10</span></label>
+          <label class="item"><input type="checkbox" data-type="sell" data-points="10"><span>放量跌破关键支撑</span><span class="points">10</span></label>
+          <label class="item"><input type="checkbox" data-type="sell" data-points="10"><span>MA10下穿MA20，趋势开始转弱</span><span class="points">10</span></label>
+        </section>
+
+        <section class="section">
+          <h3>三、盈利保护（30分）</h3>
+          <label class="item"><input type="checkbox" data-type="sell" data-points="10"><span>已盈利30%以上，开始使用移动止盈</span><span class="points">10</span></label>
+          <label class="item"><input type="checkbox" data-type="sell" data-points="10"><span>从最高点回撤10%到15%</span><span class="points">10</span></label>
+          <label class="item"><input type="checkbox" data-type="sell" data-points="10"><span>相对MA10偏离超过20%，且KDJ大于100</span><span class="points">10</span></label>
+        </section>
+
+        <section class="section">
+          <h3>四、情绪检查（10分）</h3>
+          <label class="item"><input type="checkbox" data-type="sell" data-points="5"><span>不是因为害怕正常回撤而卖出</span><span class="points">5</span></label>
+          <label class="item"><input type="checkbox" data-type="sell" data-points="5"><span>不是因为单条新闻恐慌而卖出</span><span class="points">5</span></label>
+        </section>
+      </article>
+
+      <article class="card tab-panel" data-checklist="rebuy" id="rebuyPanel">
+        <div class="card-head">
+          <div>
+            <h2>买回 Checklist</h2>
+            <div class="rules">
+              <span>≥90：可以买回</span>
+              <span>75~89：继续观察</span>
+              <span>&lt;75 或触发否决项：禁止买回</span>
+            </div>
+            <div class="blocked-reasons" id="rebuyBlocks"></div>
+          </div>
+          <div class="score-box">
+            <div class="score" id="rebuyScore">0</div>
+            <div class="score-label">/ 100</div>
+            <div class="verdict block" id="rebuyVerdict">禁止买回</div>
+          </div>
+        </div>
+
+        <section class="section">
+          <h3>硬性否决</h3>
+          <label class="item blocker"><input type="checkbox" data-type="rebuy" data-points="0" data-block="true"><span>卖出后未满5个交易日</span><span class="points">否决</span></label>
+          <label class="item blocker"><input type="checkbox" data-type="rebuy" data-points="0" data-block="true"><span>因为卖出价下方变便宜而想买回</span><span class="points">否决</span></label>
+          <label class="item blocker"><input type="checkbox" data-type="rebuy" data-points="0" data-block="true"><span>没有重新完成基本面和技术面检查</span><span class="points">否决</span></label>
+        </section>
+
+        <section class="section">
+          <h3>一、重新立论（30分）</h3>
+          <label class="item"><input type="checkbox" data-type="rebuy" data-points="10"><span>卖出理由已经失效或被新数据证伪</span><span class="points">10</span></label>
+          <label class="item"><input type="checkbox" data-type="rebuy" data-points="10"><span>公司基本面没有恶化，最新财报仍支持长期逻辑</span><span class="points">10</span></label>
+          <label class="item"><input type="checkbox" data-type="rebuy" data-points="10"><span>重新写下买回理由，而不是沿用过去的熟悉感</span><span class="points">10</span></label>
+        </section>
+
+        <section class="section">
+          <h3>二、技术确认（30分）</h3>
+          <label class="item"><input type="checkbox" data-type="rebuy" data-points="10"><span>股价重新站上MA10或MA20</span><span class="points">10</span></label>
+          <label class="item"><input type="checkbox" data-type="rebuy" data-points="10"><span>下跌停止，出现放量反弹或缩量企稳</span><span class="points">10</span></label>
+          <label class="item"><input type="checkbox" data-type="rebuy" data-points="10"><span>没有跌破上一轮关键支撑</span><span class="points">10</span></label>
+        </section>
+
+        <section class="section">
+          <h3>三、风险回报（20分）</h3>
+          <label class="item"><input type="checkbox" data-type="rebuy" data-points="10"><span>止损价明确，亏损上限可接受</span><span class="points">10</span></label>
+          <label class="item"><input type="checkbox" data-type="rebuy" data-points="10"><span>RR（盈亏比）&gt;3，不是为了追回卖飞感</span><span class="points">10</span></label>
+        </section>
+
+        <section class="section">
+          <h3>四、仓位纪律（20分）</h3>
+          <label class="item"><input type="checkbox" data-type="rebuy" data-points="10"><span>买回只用小仓位重新试错</span><span class="points">10</span></label>
+          <label class="item"><input type="checkbox" data-type="rebuy" data-points="10"><span>买回后单只股票仓位仍低于10%</span><span class="points">10</span></label>
+        </section>
+      </article>
+    </div>
+  </main>
+
+  <script>
+    const checklistTypes = ["buy", "add", "sell", "rebuy"];
+
+    const verdictRules = {
+      buy: [
+        { min: 90, text: "可以买", className: "buy" },
+        { min: 80, text: "小仓位", className: "small" },
+        { min: 0, text: "禁止买", className: "block" }
+      ],
+      add: [
+        { min: 85, text: "可以加仓", className: "buy" },
+        { min: 70, text: "只加小仓", className: "small" },
+        { min: 0, text: "禁止加仓", className: "block" }
+      ],
+      sell: [
+        { min: 80, text: "执行卖出", className: "sell" },
+        { min: 60, text: "减仓", className: "reduce" },
+        { min: 0, text: "继续持有", className: "hold" }
+      ],
+      rebuy: [
+        { min: 90, text: "可以买回", className: "buy" },
+        { min: 75, text: "继续观察", className: "wait" },
+        { min: 0, text: "禁止买回", className: "block" }
+      ]
+    };
+
+    const blockedVerdicts = {
+      buy: "禁止买",
+      add: "禁止加仓",
+      sell: "检查卖出理由",
+      rebuy: "禁止买回"
+    };
+
+    const scoreElements = Object.fromEntries(
+      checklistTypes.map(type => [type, document.getElementById(`${type}Score`)])
+    );
+
+    const verdictElements = Object.fromEntries(
+      checklistTypes.map(type => [type, document.getElementById(`${type}Verdict`)])
+    );
+
+    const blockElements = Object.fromEntries(
+      checklistTypes.map(type => [type, document.getElementById(`${type}Blocks`)])
+    );
+
+    function getInputs(type) {
+      return [...document.querySelectorAll(`input[data-type="${type}"]`)];
+    }
+
+    function getScore(type) {
+      return getInputs(type)
+        .filter(input => input.checked && input.dataset.block !== "true")
+        .reduce((sum, input) => sum + Number(input.dataset.points), 0);
+    }
+
+    function getBlockedReasons(type) {
+      return getInputs(type)
+        .filter(input => input.checked && input.dataset.block === "true")
+        .map(input => input.closest("label").querySelector("span").textContent);
+    }
+
+    function setVerdict(type, score) {
+      const blockedReasons = getBlockedReasons(type);
+      const verdict = verdictElements[type];
+      const blockBox = blockElements[type];
+
+      if (blockedReasons.length > 0) {
+        verdict.textContent = blockedVerdicts[type];
+        verdict.className = type === "sell" ? "verdict reduce" : "verdict block";
+        blockBox.classList.add("active");
+        blockBox.innerHTML = blockedReasons.map(reason => `<span>否决项：${reason}</span>`).join("");
+        return;
+      }
+
+      blockBox.classList.remove("active");
+      blockBox.textContent = "";
+
+      const rule = verdictRules[type].find(item => score >= item.min);
+      verdict.textContent = rule.text;
+      verdict.className = `verdict ${rule.className}`;
+    }
+
+    function update(type) {
+      const score = getScore(type);
+      scoreElements[type].textContent = score;
+      setVerdict(type, score);
+    }
+
+    function clearType(type) {
+      getInputs(type).forEach(input => {
+        input.checked = false;
+      });
+      update(type);
+    }
+
+    function switchTab(type) {
+      document.querySelectorAll(".tab").forEach(tab => {
+        const isActive = tab.dataset.tab === type;
+        tab.classList.toggle("active", isActive);
+        tab.setAttribute("aria-selected", String(isActive));
+      });
+
+      document.querySelectorAll(".tab-panel").forEach(panel => {
+        panel.classList.toggle("active", panel.dataset.checklist === type);
+      });
+    }
+
+    document.querySelectorAll("input[type='checkbox']").forEach(input => {
+      input.addEventListener("change", () => update(input.dataset.type));
+    });
+
+    document.querySelectorAll(".tab").forEach(tab => {
+      tab.addEventListener("click", () => switchTab(tab.dataset.tab));
+    });
+
+    document.querySelectorAll("[data-clear]").forEach(button => {
+      button.addEventListener("click", () => clearType(button.dataset.clear));
+    });
+
+    document.getElementById("clearAll").addEventListener("click", () => {
+      checklistTypes.forEach(clearType);
+    });
+  </script>
+</body>
+</html>
