@@ -2,6 +2,7 @@ const fs = require("fs");
 const assert = require("assert");
 
 const html = fs.readFileSync("checklist.html", "utf8");
+const signalHtml = fs.readFileSync("stock-signal.html", "utf8");
 
 function count(pattern) {
   return (html.match(pattern) || []).length;
@@ -29,5 +30,8 @@ assert.strictEqual(count(/data-checklist="/g), 4, "renders four checklist panels
 assert(html.includes("data-block=\"true\""), "hard block inputs are marked");
 assert(html.includes("getBlockedReasons(type)"), "script checks hard blocks");
 assert(html.includes("blockedReasons.length > 0"), "verdict uses hard blocks");
+
+assert(html.includes("href=\"stock-signal.html\""), "checklist links to stock signal page");
+assert(signalHtml.includes("href=\"checklist.html\""), "stock signal links to checklist page");
 
 console.log("checklist structure tests passed");

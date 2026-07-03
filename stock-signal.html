@@ -36,6 +36,14 @@
       padding: 36px 0;
     }
 
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: end;
+      margin-bottom: 24px;
+    }
+
     .shell {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 340px;
@@ -101,7 +109,11 @@
       margin-top: 18px;
     }
 
-    button {
+    button,
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       min-height: 42px;
       border: 0;
       border-radius: 6px;
@@ -109,6 +121,7 @@
       font-size: 15px;
       font-weight: 700;
       cursor: pointer;
+      text-decoration: none;
     }
 
     .primary {
@@ -200,6 +213,11 @@
         grid-template-columns: 1fr;
       }
 
+      header {
+        display: block;
+        margin-bottom: 20px;
+      }
+
       h1 {
         font-size: 24px;
       }
@@ -208,8 +226,13 @@
 </head>
 <body>
   <main>
-    <h1>股票买卖判断</h1>
-    <p class="subtitle">输入均线、当前股价和 KDJ，自动计算当前股价相对 MA5、MA10、MA20 的偏离值。</p>
+    <header>
+      <div>
+        <h1>股票买卖判断</h1>
+        <p class="subtitle">输入均线、当前股价和 KDJ，自动计算当前股价相对 MA5、MA10、MA20 的偏离值。</p>
+      </div>
+      <a class="secondary nav-link" href="checklist.html">交易 Checklist</a>
+    </header>
 
     <div class="shell">
       <section class="panel">
