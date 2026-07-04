@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>股票交易工具</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --line: #d9e0ea;
+      --blue: #2563eb;
+      --green: #07845d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    main {
+      width: min(880px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 48px 0;
+    }
+
+    header {
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .tool-card {
+      display: grid;
+      gap: 12px;
+      min-height: 160px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 22px;
+      background: var(--panel);
+      color: var(--text);
+      text-decoration: none;
+      box-shadow: 0 10px 28px rgba(25, 36, 54, 0.08);
+    }
+
+    .tool-card:hover,
+    .tool-card:focus {
+      border-color: var(--blue);
+      outline: none;
+    }
+
+    .tool-title {
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .tool-desc {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .tool-action {
+      align-self: end;
+      color: var(--blue);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    @media (max-width: 700px) {
+      main {
+        width: min(100% - 24px, 880px);
+        padding: 28px 0;
+      }
+
+      .tool-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>股票交易工具</h1>
+      <p class="subtitle">从这里进入买卖判断或交易 Checklist。</p>
+    </header>
+
+    <section class="tool-grid" aria-label="工具入口">
+      <a class="tool-card" href="stock-signal.html">
+        <span class="tool-title">股票买卖判断</span>
+        <p class="tool-desc">输入股价、均线和 KDJ，快速判断是否出现卖出风险信号。</p>
+        <span class="tool-action">进入</span>
+      </a>
+
+      <a class="tool-card" href="checklist.html">
+        <span class="tool-title">交易 Checklist</span>
+        <p class="tool-desc">按买入、加仓、卖出、买回流程逐项打分，并记录评价结果。</p>
+        <span class="tool-action">进入</span>
+      </a>
+
+      <a class="tool-card" href="check_history.html">
+        <span class="tool-title">Checklist 履历</span>
+        <p class="tool-desc">按起止日期查询已保存的 Checklist 评价记录，并导出 CSV。</p>
+        <span class="tool-action">进入</span>
+      </a>
+    </section>
+  </main>
+</body>
+</html>

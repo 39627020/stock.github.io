@@ -228,6 +228,37 @@
       background: var(--soft-red);
     }
 
+    .price-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 2px 0 12px 32px;
+    }
+
+    .price-field {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .price-field input {
+      min-height: 38px;
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0 10px;
+      color: var(--text);
+      background: #fff;
+      font-size: 14px;
+    }
+
+    .price-field input:focus {
+      outline: 2px solid rgba(37, 99, 235, 0.2);
+      border-color: var(--blue);
+    }
+
     .points {
       color: var(--muted);
       font-weight: 700;
@@ -260,6 +291,20 @@
       display: grid;
     }
 
+    .bottom-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .save-status {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: right;
+    }
+
     @media (max-width: 860px) {
       main {
         width: min(100% - 24px, 1180px);
@@ -275,6 +320,11 @@
         margin-top: 16px;
       }
 
+      .price-grid {
+        grid-template-columns: 1fr;
+        margin-left: 0;
+      }
+
       .tabs {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         width: 100%;
@@ -282,6 +332,15 @@
 
       .card-head {
         align-items: flex-start;
+      }
+
+      .bottom-actions {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .save-status {
+        text-align: left;
       }
     }
   </style>
@@ -294,7 +353,7 @@
         <p class="subtitle">把买入、加仓、卖出、买回拆成四个流程。先看硬性否决项，再看分数。</p>
       </div>
       <div class="actions">
-        <a class="secondary nav-link" href="stock-signal.html">股票买卖判断</a>
+        <a class="secondary nav-link" href="home.html">返回首页</a>
         <button class="secondary" type="button" data-clear="buy">清空买入</button>
         <button class="secondary" type="button" data-clear="add">清空加仓</button>
         <button class="secondary" type="button" data-clear="sell">清空卖出</button>
@@ -354,6 +413,11 @@
           <h3>三、风险回报（20分）</h3>
           <label class="item"><input type="checkbox" data-type="buy" data-points="10"><span>止损距离不超过8%，且能严格执行</span><span class="points">10</span></label>
           <label class="item"><input type="checkbox" data-type="buy" data-points="10"><span>RR（盈亏比）&gt;3，目标空间足够</span><span class="points">10</span></label>
+          <div class="price-grid" data-price-group="buy">
+            <label class="price-field">买入价<input type="number" inputmode="decimal" step="0.01" min="0" data-price-type="buy" data-price-field="entryPrice" placeholder="例如 130.00"></label>
+            <label class="price-field">止损价<input type="number" inputmode="decimal" step="0.01" min="0" data-price-type="buy" data-price-field="stopLoss" placeholder="例如 120.00"></label>
+            <label class="price-field">止盈价<input type="number" inputmode="decimal" step="0.01" min="0" data-price-type="buy" data-price-field="takeProfit" placeholder="例如 150.00"></label>
+          </div>
         </section>
 
         <section class="section">
@@ -503,6 +567,11 @@
           <h3>三、风险回报（20分）</h3>
           <label class="item"><input type="checkbox" data-type="rebuy" data-points="10"><span>止损价明确，亏损上限可接受</span><span class="points">10</span></label>
           <label class="item"><input type="checkbox" data-type="rebuy" data-points="10"><span>RR（盈亏比）&gt;3，不是为了追回卖飞感</span><span class="points">10</span></label>
+          <div class="price-grid" data-price-group="rebuy">
+            <label class="price-field">买入价<input type="number" inputmode="decimal" step="0.01" min="0" data-price-type="rebuy" data-price-field="entryPrice" placeholder="例如 130.00"></label>
+            <label class="price-field">止损价<input type="number" inputmode="decimal" step="0.01" min="0" data-price-type="rebuy" data-price-field="stopLoss" placeholder="例如 120.00"></label>
+            <label class="price-field">止盈价<input type="number" inputmode="decimal" step="0.01" min="0" data-price-type="rebuy" data-price-field="takeProfit" placeholder="例如 150.00"></label>
+          </div>
         </section>
 
         <section class="section">
@@ -512,10 +581,17 @@
         </section>
       </article>
     </div>
+
+    <div class="bottom-actions">
+      <button class="primary" type="button" id="confirmEvaluation">确定</button>
+      <button class="secondary" type="button" id="clearForm">清除</button>
+    </div>
+    <p class="save-status" id="saveStatus" aria-live="polite"></p>
   </main>
 
   <script>
     const checklistTypes = ["buy", "add", "sell", "rebuy"];
+    const evaluationStorageKey = "tradeChecklistEvaluations";
 
     const verdictRules = {
       buy: [
@@ -563,6 +639,16 @@
       return [...document.querySelectorAll(`input[data-type="${type}"]`)];
     }
 
+    function getPriceInputs(type) {
+      return [...document.querySelectorAll(`input[data-price-type="${type}"]`)];
+    }
+
+    function getPriceData(type) {
+      return Object.fromEntries(
+        getPriceInputs(type).map(input => [input.dataset.priceField, input.value.trim()])
+      );
+    }
+
     function getScore(type) {
       return getInputs(type)
         .filter(input => input.checked && input.dataset.block !== "true")
@@ -573,6 +659,39 @@
       return getInputs(type)
         .filter(input => input.checked && input.dataset.block === "true")
         .map(input => input.closest("label").querySelector("span").textContent);
+    }
+
+    function getCheckedItems(type) {
+      return getInputs(type)
+        .filter(input => input.checked)
+        .map(input => input.closest("label").querySelector("span").textContent);
+    }
+
+    function readSavedEvaluations() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(evaluationStorageKey) || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveEvaluation(type, score) {
+      const record = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        createdAt: new Date().toISOString(),
+        type,
+        score,
+        verdict: verdictElements[type].textContent,
+        verdictClass: verdictElements[type].className,
+        blockedReasons: getBlockedReasons(type),
+        checkedItems: getCheckedItems(type),
+        prices: getPriceData(type)
+      };
+      const evaluations = readSavedEvaluations();
+      evaluations.push(record);
+      localStorage.setItem(evaluationStorageKey, JSON.stringify(evaluations));
+      localStorage.setItem(`${evaluationStorageKey}:latest`, JSON.stringify(record));
     }
 
     function setVerdict(type, score) {
@@ -606,7 +725,18 @@
       getInputs(type).forEach(input => {
         input.checked = false;
       });
+      getPriceInputs(type).forEach(input => {
+        input.value = "";
+      });
       update(type);
+    }
+
+    function clearAllTypes() {
+      checklistTypes.forEach(clearType);
+    }
+
+    function getActiveType() {
+      return document.querySelector(".tab.active")?.dataset.tab || checklistTypes[0];
     }
 
     function switchTab(type) {
@@ -625,6 +755,10 @@
       input.addEventListener("change", () => update(input.dataset.type));
     });
 
+    document.querySelectorAll("input[data-price-type]").forEach(input => {
+      input.addEventListener("input", () => update(input.dataset.priceType));
+    });
+
     document.querySelectorAll(".tab").forEach(tab => {
       tab.addEventListener("click", () => switchTab(tab.dataset.tab));
     });
@@ -634,7 +768,20 @@
     });
 
     document.getElementById("clearAll").addEventListener("click", () => {
-      checklistTypes.forEach(clearType);
+      clearAllTypes();
+    });
+
+    document.getElementById("confirmEvaluation").addEventListener("click", () => {
+      const activeType = getActiveType();
+      update(activeType);
+      const score = getScore(activeType);
+      saveEvaluation(activeType, score);
+      document.getElementById("saveStatus").textContent = "已保存当前评价。";
+    });
+
+    document.getElementById("clearForm").addEventListener("click", () => {
+      clearAllTypes();
+      document.getElementById("saveStatus").textContent = "已清除页面输入。";
     });
   </script>
 </body>

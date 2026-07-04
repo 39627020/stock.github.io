@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checklist 履历</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --line: #d9e0ea;
+      --blue: #2563eb;
+      --green: #07845d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: end;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    button,
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      border: 0;
+      border-radius: 6px;
+      padding: 0 14px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .primary {
+      color: #fff;
+      background: var(--blue);
+    }
+
+    .secondary {
+      color: var(--text);
+      background: #e9eef6;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 10px 28px rgba(25, 36, 54, 0.08);
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 220px)) auto auto auto;
+      gap: 12px;
+      align-items: end;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input {
+      min-height: 40px;
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0 10px;
+      color: var(--text);
+      background: #fff;
+      font-size: 14px;
+    }
+
+    input:focus {
+      outline: 2px solid rgba(37, 99, 235, 0.2);
+      border-color: var(--blue);
+    }
+
+    .summary {
+      margin: 0;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 960px;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--line);
+      padding: 12px 10px;
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.5;
+    }
+
+    th {
+      color: var(--muted);
+      background: #f8fafc;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    td.compact {
+      white-space: nowrap;
+    }
+
+    .select-cell {
+      width: 44px;
+      text-align: center;
+    }
+
+    .select-cell input {
+      width: 18px;
+      height: 18px;
+      min-height: 18px;
+      margin: 0;
+      accent-color: var(--blue);
+      cursor: pointer;
+    }
+
+    .empty {
+      margin: 0;
+      padding: 28px 20px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      border-top: 1px solid var(--line);
+    }
+
+    .page-info {
+      color: var(--muted);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 760px) {
+      main {
+        width: min(100% - 24px, 1180px);
+        padding: 24px 0;
+      }
+
+      header {
+        display: block;
+      }
+
+      .nav-link {
+        margin-top: 16px;
+      }
+
+      .filters {
+        grid-template-columns: 1fr;
+      }
+
+      .pagination {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>Checklist 履历</h1>
+        <p class="subtitle">查询保存在浏览器 localStorage 中的 Checklist 评价记录。</p>
+      </div>
+      <a class="secondary nav-link" href="home.html">返回首页</a>
+    </header>
+
+    <section class="panel">
+      <div class="filters">
+        <label for="startDate">开始日期
+          <input id="startDate" type="date">
+        </label>
+        <label for="endDate">结束日期
+          <input id="endDate" type="date">
+        </label>
+        <button class="primary" type="button" id="search">查询</button>
+        <button class="secondary" type="button" id="deleteSelected">删除</button>
+        <button class="secondary" type="button" id="exportCsv">导出CSV</button>
+      </div>
+
+      <p class="summary" id="summary">等待查询。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="select-cell"><input id="selectAllRecords" type="checkbox" aria-label="全选择"></th>
+              <th>时间</th>
+              <th>类型</th>
+              <th>分数</th>
+              <th>结论</th>
+              <th>买入价</th>
+              <th>止损价</th>
+              <th>止盈价</th>
+              <th>否决原因</th>
+              <th>已勾选项</th>
+            </tr>
+          </thead>
+          <tbody id="historyRows"></tbody>
+        </table>
+      </div>
+      <p class="empty" id="emptyState">没有符合条件的履历。</p>
+      <div class="pagination" aria-label="分页">
+        <button class="secondary" type="button" id="prevPage">上一页</button>
+        <span class="page-info" id="pageInfo">第 1 / 1 页，共 0 条</span>
+        <button class="secondary" type="button" id="nextPage">下一页</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const evaluationStorageKey = "tradeChecklistEvaluations";
+    const pageSize = 20;
+    const typeLabels = {
+      buy: "买入",
+      add: "加仓",
+      sell: "卖出",
+      rebuy: "买回"
+    };
+    let currentRecords = [];
+    let currentPage = 1;
+
+    const startDate = document.getElementById("startDate");
+    const endDate = document.getElementById("endDate");
+    const rows = document.getElementById("historyRows");
+    const summary = document.getElementById("summary");
+    const emptyState = document.getElementById("emptyState");
+    const selectAllRecords = document.getElementById("selectAllRecords");
+    const prevPage = document.getElementById("prevPage");
+    const nextPage = document.getElementById("nextPage");
+    const pageInfo = document.getElementById("pageInfo");
+
+    function readEvaluations() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(evaluationStorageKey) || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function toDateLimit(value, endOfDay) {
+      if (!value) {
+        return null;
+      }
+      const suffix = endOfDay ? "T23:59:59.999" : "T00:00:00.000";
+      const date = new Date(`${value}${suffix}`);
+      return Number.isNaN(date.getTime()) ? null : date;
+    }
+
+    function getFilteredRecords() {
+      const from = toDateLimit(startDate.value, false);
+      const to = toDateLimit(endDate.value, true);
+
+      return readEvaluations()
+        .filter(record => record && record.createdAt)
+        .filter(record => {
+          const createdAt = new Date(record.createdAt);
+          if (Number.isNaN(createdAt.getTime())) {
+            return false;
+          }
+          if (from && createdAt < from) {
+            return false;
+          }
+          if (to && createdAt > to) {
+            return false;
+          }
+          return true;
+        })
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
+
+    function formatDateTime(value) {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) {
+        return "";
+      }
+      return date.toLocaleString("zh-CN", { hour12: false });
+    }
+
+    function joinList(value) {
+      return Array.isArray(value) ? value.join("；") : "";
+    }
+
+    function getRecordKey(record) {
+      if (record.id) {
+        return record.id;
+      }
+      return [record.createdAt || "", record.type || "", record.score ?? ""].join("|");
+    }
+
+    function setCell(row, text, className = "") {
+      const cell = document.createElement("td");
+      cell.textContent = text;
+      if (className) {
+        cell.className = className;
+      }
+      row.appendChild(cell);
+    }
+
+    function setSelectCell(row, record) {
+      const cell = document.createElement("td");
+      const input = document.createElement("input");
+      cell.className = "select-cell";
+      input.type = "checkbox";
+      input.setAttribute("class", "record-select");
+      input.setAttribute("data-record-key", getRecordKey(record));
+      input.setAttribute("aria-label", "选择履历");
+      input.addEventListener("change", updateSelectAllState);
+      cell.appendChild(input);
+      row.appendChild(cell);
+    }
+
+    function getRecordCheckboxes() {
+      return [...document.querySelectorAll(".record-select")];
+    }
+
+    function updateSelectAllState() {
+      const checkboxes = getRecordCheckboxes();
+      const checkedCount = checkboxes.filter(input => input.checked).length;
+      selectAllRecords.checked = checkboxes.length > 0 && checkedCount === checkboxes.length;
+      selectAllRecords.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+    }
+
+    function getTotalPages() {
+      return Math.max(1, Math.ceil(currentRecords.length / pageSize));
+    }
+
+    function normalizeCurrentPage() {
+      currentPage = Math.min(Math.max(1, currentPage), getTotalPages());
+    }
+
+    function getPageRecords() {
+      const start = (currentPage - 1) * pageSize;
+      return currentRecords.slice(start, start + pageSize);
+    }
+
+    function renderPagination() {
+      const totalPages = getTotalPages();
+      pageInfo.textContent = `第 ${currentPage} / ${totalPages} 页，共 ${currentRecords.length} 条`;
+      prevPage.disabled = currentPage <= 1;
+      nextPage.disabled = currentPage >= totalPages;
+    }
+
+    function renderRecords() {
+      normalizeCurrentPage();
+      rows.textContent = "";
+      selectAllRecords.checked = false;
+      selectAllRecords.indeterminate = false;
+      getPageRecords().forEach(record => {
+        const row = document.createElement("tr");
+        setSelectCell(row, record);
+        setCell(row, formatDateTime(record.createdAt), "compact");
+        setCell(row, typeLabels[record.type] || record.type || "");
+        setCell(row, String(record.score ?? ""));
+        setCell(row, record.verdict || "");
+        setCell(row, record.prices?.entryPrice || "");
+        setCell(row, record.prices?.stopLoss || "");
+        setCell(row, record.prices?.takeProfit || "");
+        setCell(row, joinList(record.blockedReasons));
+        setCell(row, joinList(record.checkedItems));
+        rows.appendChild(row);
+      });
+
+      emptyState.style.display = currentRecords.length === 0 ? "block" : "none";
+      summary.textContent = `当前查询到 ${currentRecords.length} 条履历。`;
+      renderPagination();
+    }
+
+    function searchRecords() {
+      currentPage = 1;
+      currentRecords = getFilteredRecords();
+      renderRecords();
+    }
+
+    function getSelectedRecordKeys() {
+      return new Set(
+        getRecordCheckboxes()
+          .filter(input => input.checked)
+          .map(input => input.dataset.recordKey)
+      );
+    }
+
+    function deleteSelectedRecords() {
+      const selectedKeys = getSelectedRecordKeys();
+      if (selectedKeys.size === 0) {
+        summary.textContent = "请选择要删除的履历。";
+        return;
+      }
+
+      const remainingRecords = readEvaluations()
+        .filter(record => !selectedKeys.has(getRecordKey(record)));
+      localStorage.setItem(evaluationStorageKey, JSON.stringify(remainingRecords));
+      currentRecords = getFilteredRecords();
+      normalizeCurrentPage();
+      renderRecords();
+      summary.textContent = `已删除 ${selectedKeys.size} 条履历，当前显示 ${currentRecords.length} 条履历。`;
+    }
+
+    function csvEscape(value) {
+      const text = String(value ?? "");
+      return `"${text.replaceAll('"', '""')}"`;
+    }
+
+    function toCsv(records) {
+      const header = ["时间", "类型", "分数", "结论", "买入价", "止损价", "止盈价", "否决原因", "已勾选项"];
+      const lines = records.map(record => [
+        formatDateTime(record.createdAt),
+        typeLabels[record.type] || record.type || "",
+        record.score ?? "",
+        record.verdict || "",
+        record.prices?.entryPrice || "",
+        record.prices?.stopLoss || "",
+        record.prices?.takeProfit || "",
+        joinList(record.blockedReasons),
+        joinList(record.checkedItems)
+      ].map(csvEscape).join(","));
+      return [header.map(csvEscape).join(","), ...lines].join("\r\n");
+    }
+
+    function exportCsv() {
+      if (currentRecords.length === 0) {
+        summary.textContent = "当前没有可导出的履历。";
+        return;
+      }
+
+      const blob = new Blob(["\ufeff", toCsv(currentRecords)], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "checklist-history.csv";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById("search").addEventListener("click", searchRecords);
+    document.getElementById("deleteSelected").addEventListener("click", deleteSelectedRecords);
+    document.getElementById("exportCsv").addEventListener("click", exportCsv);
+    prevPage.addEventListener("click", () => {
+      currentPage -= 1;
+      renderRecords();
+    });
+    nextPage.addEventListener("click", () => {
+      currentPage += 1;
+      renderRecords();
+    });
+    selectAllRecords.addEventListener("change", () => {
+      getRecordCheckboxes().forEach(input => {
+        input.checked = selectAllRecords.checked;
+      });
+      updateSelectAllState();
+    });
+    searchRecords();
+  </script>
+</body>
+</html>
